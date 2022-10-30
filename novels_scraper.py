@@ -1,32 +1,39 @@
 # pip3 install requests
 # pip3 install beautifulsoup4
+# pip3 install --upgrade oauth2client
+# pip install gspread
 
 import requests
 from bs4 import BeautifulSoup
 import csv
-import pygsheets
-import pandas as pd
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+ 
 
 order = []
 titles = []
 writers = []
 countries = []
 
-def import_to_google_sheet(csv_file):
-    if csv_file:
-        #authorization
-        gc = pygsheets.authorize(service_file='/home/omar/Downloads/web-scrappint-g-sheet-3042f849f4cf.json')
-        sh = gc.open('Sheet1')
-        wks = sh[0]
+def import_to_google_sheet(my_file, sheet_file):
+    scope = ['https://www.googleapis.com/auth/spreadsheets','https://www.googleapis.com/auth/drive']
+    if my_file and sheet_file:
+        cred = ServiceAccountCredentials.from_json_keyfile_name('web-scrappint-g-sheet-3042f849f4cf.json',scope)
+        client = gspread.authorize(cred)
+        scrap_gsheet = client.open("web-scrapping")
+        first_sheet = scrap_gsheet.get_worksheet(0)
+        content = list(csv.reader(open('novels.csv')))
+        first_sheet.append_rows(content, value_input_option="USER_ENTERED")
 
 
 def write_to_excel(columns,order,titles,writers,countries):
     lines = zip(order,titles,writers,countries)
-    with open("novels.csv","w") as my_file:
+    sheet_file = "novels.csv"
+    with open(sheet_file,"w") as my_file:
         wr = csv.writer(my_file)
         wr.writerow(columns)
         wr.writerows(lines)
-    import_to_google_sheet(my_file)
+    import_to_google_sheet(my_file, sheet_file)
 
 
 def scrap_novels(url):
