@@ -37,7 +37,7 @@ def write_to_excel(columns,order,titles,writers,countries):
 
 
 def scrap_novels(url):
-    site_result = requests.get(page_url)
+    site_result = requests.get(url)
     source = site_result.content
     soup = BeautifulSoup(source, "lxml")
     novels_table = soup.find('table', {"class":"wikitable"})
